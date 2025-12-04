@@ -35,6 +35,8 @@ export async function getSession() {
         email: true,
         fullName: true,
         role: true,
+        isBlocked: true,
+        phone: true,
       },
     })
     return user
