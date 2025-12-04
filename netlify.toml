@@ -6,8 +6,8 @@
   NODE_VERSION = "20"
   PRISMA_GENERATE_DATAPROXY = "true"
 
-[[plugins]]
-  package = "@netlify/plugin-nextjs"
+# Netlify Next.js plugin will be installed automatically during build
+# No need to specify it here for Next.js 14
 
 [[redirects]]
   from = "/sitemap.xml"
