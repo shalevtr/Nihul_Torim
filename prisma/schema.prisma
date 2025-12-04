@@ -1,0 +1,237 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  CUSTOMER
+  BUSINESS_OWNER
+  ADMIN
+}
+
+enum SubscriptionPlan {
+  BASIC
+  STANDARD
+  PREMIUM
+}
+
+model User {
+  id                    String        @id @default(cuid())
+  email                 String        @unique
+  passwordHash          String
+  fullName              String?
+  phone                 String?
+  role                  Role          @default(CUSTOMER)
+  cancellationCount     Int           @default(0)
+  lastCancellationReset DateTime      @default(now())
+  isBlocked             Boolean       @default(false)
+  createdAt             DateTime      @default(now())
+  updatedAt             DateTime      @updatedAt
+
+  businesses            Business[]    @relation("UserBusinesses")
+  appointments          Appointment[] @relation("UserAppointments")
+  messages              Message[]     @relation("UserMessages")
+  timeSlots             TimeSlot[]    @relation("UserTimeSlots")
+  reviews               Review[]
+  favorites             Favorite[]
+  blockedAsCustomer     BlockedCustomer[] @relation("BlockedCustomers")
+  blockedByMe           BlockedCustomer[] @relation("BlockedByUser")
+  notifications         Notification[] @relation("UserNotifications")
+}
+
+model Business {
+  id                    String             @id @default(cuid())
+  name                  String
+  slug                  String?            @unique
+  category              String
+  city                  String?
+  address               String?
+  description           String?
+  logo                  String?
+  phone                 String?
+  slotDuration          Int                @default(30) // minutes
+  workingHours          String?            // JSON string: {"sunday": "08:00-18:00", ...}
+  latitude              Float?
+  longitude             Float?
+  subscriptionPlan      SubscriptionPlan   @default(BASIC)
+  cancellationPolicy    String             @default("FLEXIBLE") // FLEXIBLE, MODERATE, STRICT
+  owner                 User               @relation("UserBusinesses", fields: [ownerId], references: [id])
+  ownerId               String
+  createdAt             DateTime           @default(now())
+  updatedAt             DateTime           @updatedAt
+
+  appointments          Appointment[]
+  images                BusinessImage[]
+  messages              Message[]
+  timeSlots             TimeSlot[]
+  reviews               Review[]
+  favorites             Favorite[]
+  services              Service[]
+  staff                 Staff[]
+  blockedCustomers      BlockedCustomer[]
+  notifications         Notification[]
+}
+
+model Review {
+  id         String   @id @default(cuid())
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  businessId String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId     String
+  rating     Int      // 1-5
+  comment    String?
+  reply      String?  // Business owner reply
+  repliedAt  DateTime?
+  createdAt  DateTime @default(now())
+
+  @@unique([businessId, userId])
+  @@index([businessId])
+}
+
+model Favorite {
+  id         String   @id @default(cuid())
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  businessId String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId     String
+  createdAt  DateTime @default(now())
+
+  @@unique([businessId, userId])
+  @@index([userId])
+}
+
+model Service {
+  id          String   @id @default(cuid())
+  business    Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  businessId  String
+  name        String
+  description String?
+  price       Float
+  duration    Int      // minutes
+  createdAt   DateTime @default(now())
+  appointments Appointment[]
+
+  @@index([businessId])
+}
+
+model TimeSlot {
+  id         String    @id @default(cuid())
+  business   Business  @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  businessId String
+  date       DateTime
+  startTime  String    // "08:00"
+  endTime    String    // "08:30"
+  isBooked   Boolean   @default(false)
+  bookedBy   User?     @relation("UserTimeSlots", fields: [bookedById], references: [id])
+  bookedById String?
+  reservedUntil DateTime? // Temporary reservation until this time
+  createdAt  DateTime  @default(now())
+
+  @@unique([businessId, date, startTime])
+  @@index([businessId, date])
+  @@index([businessId, isBooked, date])
+  @@index([reservedUntil])
+}
+
+model Appointment {
+  id          String    @id @default(cuid())
+  business    Business  @relation(fields: [businessId], references: [id])
+  businessId  String
+  customer    User?     @relation("UserAppointments", fields: [customerId], references: [id])
+  customerId  String?
+  service     Service?  @relation(fields: [serviceId], references: [id])
+  serviceId   String?
+  startTime   DateTime
+  endTime     DateTime
+  status      AppointmentStatus @default(PENDING)
+  notes       String?
+  createdAt   DateTime  @default(now())
+  notifications Notification[]
+
+  @@index([businessId, status, startTime])
+  @@index([customerId, status])
+  @@index([startTime])
+}
+
+enum AppointmentStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+}
+
+model BusinessImage {
+  id         String    @id @default(cuid())
+  business   Business  @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  businessId String
+  url        String
+  caption    String?
+  category   String?   // "general", "before_after", "gallery"
+  beforeUrl  String?   // For before/after pairs
+  createdAt  DateTime  @default(now())
+}
+
+model Staff {
+  id         String   @id @default(cuid())
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  businessId String
+  name       String
+  email      String?
+  phone      String?
+  role       String?  // "hairdresser", "nail tech", etc
+  createdAt  DateTime @default(now())
+
+  @@index([businessId])
+}
+
+model Message {
+  id          String   @id @default(cuid())
+  business    Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  businessId  String
+  fromUser    User?    @relation("UserMessages", fields: [fromUserId], references: [id])
+  fromUserId  String?
+  content     String
+  createdAt   DateTime @default(now())
+  isRead      Boolean  @default(false)
+}
+
+model BlockedCustomer {
+  id         String   @id @default(cuid())
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  businessId String
+  customer   User     @relation("BlockedCustomers", fields: [customerId], references: [id], onDelete: Cascade)
+  customerId String
+  reason     String?
+  createdAt  DateTime @default(now())
+  createdBy  User?    @relation("BlockedByUser", fields: [createdById], references: [id])
+  createdById String?
+
+  @@unique([businessId, customerId])
+  @@index([businessId])
+  @@index([customerId])
+}
+
+model Notification {
+  id          String   @id @default(cuid())
+  business    Business? @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  businessId  String?
+  user        User      @relation("UserNotifications", fields: [userId], references: [id], onDelete: Cascade)
+  userId      String
+  type        String    // "APPOINTMENT_PENDING", "APPOINTMENT_CONFIRMED", "APPOINTMENT_CANCELLED", "APPOINTMENT_BOOKED"
+  title       String
+  message     String
+  appointment Appointment? @relation(fields: [appointmentId], references: [id], onDelete: Cascade)
+  appointmentId String?
+  isRead      Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+
+  @@index([userId, isRead])
+  @@index([businessId])
+}
+
