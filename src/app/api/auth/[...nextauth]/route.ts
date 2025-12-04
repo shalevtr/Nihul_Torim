@@ -4,7 +4,7 @@ import { prisma } from "@/lib/db"
 import bcrypt from "bcryptjs"
 import { Role } from "@prisma/client"
 
-const handler = NextAuth({
+const authOptions = {
   providers: [
     CredentialsProvider({
       name: "Credentials",
@@ -41,7 +41,7 @@ const handler = NextAuth({
     }),
   ],
   session: {
-    strategy: "jwt",
+    strategy: "jwt" as const,
   },
   callbacks: {
     async jwt({ token, user }) {
@@ -62,7 +62,11 @@ const handler = NextAuth({
   pages: {
     signIn: "/auth/login",
   },
-})
+}
 
-export { handler as GET, handler as POST }
+const handler = NextAuth(authOptions)
+
+// Type assertion to fix Next.js App Router compatibility
+export const GET = handler as any
+export const POST = handler as any
 
