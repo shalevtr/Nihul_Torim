@@ -43,7 +43,6 @@ export async function POST(request: Request) {
       }
 
       // Check if slot time has passed
-      const now = new Date()
       const slotDate = new Date(slot.date)
       const [startHour, startMinute] = slot.startTime.split(':').map(Number)
       const slotStartDateTime = new Date(slotDate)
