@@ -71,3 +71,6 @@ export function getPlanPrice(plan: SubscriptionPlan): number {
   return SUBSCRIPTION_FEATURES[plan].price
 }
 
+// Alias for backward compatibility
+export const subscriptionPlans = SUBSCRIPTION_FEATURES
+

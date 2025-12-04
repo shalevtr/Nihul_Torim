@@ -30,7 +30,7 @@ export async function GET(
 
     // Check if user has team management permission
     const plan = subscriptionPlans[business.subscriptionPlan]
-    if (!plan.canManageTeam) {
+    if (!plan.canManageStaff) {
       return NextResponse.json(
         { error: "ניהול צוות זמין רק במסלול Standard ומעלה" },
         { status: 403 }
@@ -81,7 +81,7 @@ export async function POST(
 
     // Check if user has team management permission
     const plan = subscriptionPlans[business.subscriptionPlan]
-    if (!plan.canManageTeam) {
+    if (!plan.canManageStaff) {
       return NextResponse.json(
         { error: "ניהול צוות זמין רק במסלול Standard ומעלה" },
         { status: 403 }

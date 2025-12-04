@@ -16,7 +16,7 @@ async function getBusinessStats(id: string, userId: string, userRole: string) {
 
   // Check if user has statistics permission (Premium only)
   const plan = subscriptionPlans[business.subscriptionPlan]
-  if (!plan.canAccessStatistics) {
+  if (!plan.canUseStats) {
     return { business, noAccess: true }
   }
 
