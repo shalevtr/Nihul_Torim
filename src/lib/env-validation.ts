@@ -57,15 +57,24 @@ export function validateEnv() {
 
 // Validate on import (only in production runtime, not during build)
 // During build, we allow missing env vars for static pages
-if (process.env.NODE_ENV === 'production' && process.env.NEXT_PHASE !== 'phase-production-build') {
+// NEVER throw during build phase - only warn
+const isBuildPhase = process.env.NEXT_PHASE === 'phase-production-build' || process.env.NODE_ENV !== 'production'
+
+if (!isBuildPhase) {
+  // Only validate at runtime in production
   try {
     validateEnv()
   } catch (error) {
     console.error('❌ Environment validation failed:', error)
-    // Don't throw during build - let it fail at runtime instead
-    if (process.env.NEXT_PHASE !== 'phase-production-build') {
-      throw error
-    }
+    throw error
+  }
+} else {
+  // During build, just log warnings instead of throwing
+  if (!process.env.DATABASE_URL) {
+    console.warn('⚠️ DATABASE_URL not set during build. This is OK for static pages.')
+  }
+  if (!process.env.NEXTAUTH_SECRET) {
+    console.warn('⚠️ NEXTAUTH_SECRET not set during build. Set it in production environment.')
   }
 }
 

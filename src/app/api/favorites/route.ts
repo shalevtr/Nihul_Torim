@@ -88,7 +88,13 @@ export async function GET(request: Request) {
       where: { userId: user.id },
       include: {
         business: {
-          include: {
+          select: {
+            id: true,
+            slug: true,
+            name: true,
+            category: true,
+            city: true,
+            logo: true,
             _count: {
               select: {
                 reviews: true,

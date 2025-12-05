@@ -27,7 +27,7 @@ export function MessageForm({ businessId }: MessageFormProps) {
     e.preventDefault()
 
     if (!user) {
-      router.push(`/auth/login?callbackUrl=/business/${businessId}`)
+      router.push(`/auth/login?callbackUrl=/b/${businessId}`)
       return
     }
 

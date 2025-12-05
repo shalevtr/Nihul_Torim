@@ -226,7 +226,7 @@ export default function QuickBookPage() {
                       קבע עכשיו
                     </Button>
                     <Button variant="outline" asChild>
-                      <Link href={`/business/${slot.businessId}`}>פרטים</Link>
+                      <Link href={`/b/${slot.businessSlug || slot.businessId}`}>פרטים</Link>
                     </Button>
                   </div>
                 </CardContent>

@@ -49,6 +49,7 @@ export async function GET() {
       business: {
         select: {
           id: true,
+          slug: true,
           name: true,
           category: true,
         },

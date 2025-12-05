@@ -7,6 +7,10 @@ import { Navbar } from "@/components/navbar"
 import { AccessibilityPanel } from "@/components/accessibility-panel"
 import { Toaster } from "@/components/ui/toaster"
 
+// Mark as dynamic to prevent DB calls during build
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
 async function getBusiness(id: string) {
   const business = await prisma.business.findUnique({
     where: { id },
@@ -61,7 +65,7 @@ export default async function BookAppointmentPage({
   const user = await getCurrentUser()
   
   if (!user) {
-    redirect(`/auth/login?callbackUrl=/business/${params.id}/book`)
+    redirect(`/auth/login?callbackUrl=/b/${params.id}/book`)
   }
 
   const business = await getBusiness(params.id)

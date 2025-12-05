@@ -211,7 +211,7 @@ export default function SearchPage() {
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {businesses.map((business: any) => (
               <div key={business.id} className="relative">
-                <Link href={`/business/${business.id}`}>
+                <Link href={`/b/${business.slug || business.id}`}>
                   <Card className="overflow-hidden transition-all hover:shadow-xl hover:scale-[1.02] cursor-pointer h-full">
                     {business.logo && (
                       <div className="h-48 overflow-hidden bg-gradient-to-br from-indigo-100 to-purple-100 flex items-center justify-center p-4">

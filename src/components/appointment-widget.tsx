@@ -29,7 +29,7 @@ export function AppointmentWidget({ businessId }: AppointmentWidgetProps) {
     e.preventDefault()
 
     if (!user) {
-      router.push(`/auth/login?callbackUrl=/business/${businessId}`)
+      router.push(`/auth/login?callbackUrl=/b/${businessId}`)
       return
     }
 

@@ -17,7 +17,7 @@ interface ShareButtonProps {
 
 export function ShareButton({ businessId, businessName }: ShareButtonProps) {
   const { toast } = useToast()
-  const url = typeof window !== "undefined" ? `${window.location.origin}/business/${businessId}` : ""
+  const url = typeof window !== "undefined" ? `${window.location.origin}/b/${businessId}` : ""
 
   function shareWhatsApp() {
     const text = `היי! מצאתי עסק מעולה: ${businessName}\nתבדוק: ${url}`

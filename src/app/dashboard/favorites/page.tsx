@@ -51,7 +51,7 @@ export default function FavoritesPage() {
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {favorites.map((fav: any) => (
-            <Link key={fav.id} href={`/business/${fav.business.id}`}>
+            <Link key={fav.id} href={`/b/${fav.business.slug || fav.business.id}`}>
               <Card className="overflow-hidden transition-all hover:shadow-xl hover:scale-[1.02] cursor-pointer h-full">
                 {fav.business.logo && (
                   <div className="h-32 overflow-hidden bg-gray-100">

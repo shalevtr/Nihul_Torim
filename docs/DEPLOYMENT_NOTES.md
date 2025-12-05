@@ -114,8 +114,12 @@ The following routes are marked as dynamic and require DB access at runtime:
 
 - `/api/*` - All API routes
 - `/b/[id]` - Public business pages (cached for 5 minutes)
+- `/business/[id]` - Legacy business pages (marked as dynamic, redirects to `/b/[id]`)
+- `/business/[id]/book` - Booking page (marked as dynamic)
 - `/api/sitemap` - Sitemap generation
 - `/api/robots` - Robots.txt
+
+**Note**: All internal links have been updated to use `/b/[slug]` instead of `/business/[id]` for better SEO and cleaner URLs.
 
 ---
 

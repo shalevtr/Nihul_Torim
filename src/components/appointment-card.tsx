@@ -149,7 +149,7 @@ export function AppointmentCard({ appointment, onDismiss }: AppointmentCardProps
           
           <div className="flex gap-2 pt-2">
             <Button variant="outline" size="sm" asChild className="flex-1 gap-2">
-              <Link href={`/business/${appointment.business.id}`}>
+              <Link href={`/b/${appointment.business.slug || appointment.business.id}`}>
                 <span>👁️</span>
                 צפה בעסק
               </Link>

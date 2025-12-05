@@ -39,7 +39,7 @@ export function FavoriteButton({ businessId, userId, initialIsFavorite = false }
         description: "יש להתחבר כדי לשמור מועדפים",
         variant: "destructive",
       })
-      router.push(`/auth/login?callbackUrl=/business/${businessId}`)
+      router.push(`/auth/login?callbackUrl=/b/${businessId}`)
       return
     }
 

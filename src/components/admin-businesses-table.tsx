@@ -111,7 +111,7 @@ export function AdminBusinessesTable({ businesses }: AdminBusinessesTableProps) 
               <td className="p-2">
                 <div className="flex gap-2">
                   <Button size="sm" variant="outline" asChild>
-                    <Link href={`/business/${business.id}`}>צפה</Link>
+                    <Link href={`/b/${business.slug || business.id}`}>צפה</Link>
                   </Button>
                   <Button
                     size="sm"

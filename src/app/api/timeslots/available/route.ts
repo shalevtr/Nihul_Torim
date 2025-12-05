@@ -50,6 +50,7 @@ export async function GET(request: Request) {
         business: {
           select: {
             id: true,
+            slug: true,
             name: true,
             category: true,
             city: true,
@@ -96,6 +97,7 @@ export async function GET(request: Request) {
       return {
         slotId: slot.id,
         businessId: slot.business.id,
+        businessSlug: slot.business.slug || slot.business.id,
         businessName: slot.business.name,
         category: slot.business.category,
         city: slot.business.city,

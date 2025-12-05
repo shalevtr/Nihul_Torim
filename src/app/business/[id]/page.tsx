@@ -16,6 +16,10 @@ import { WorkingHoursSection } from "@/components/working-hours-section"
 import { BeforeAfterGallery } from "@/components/before-after-gallery"
 import Link from "next/link"
 
+// Mark as dynamic to prevent DB calls during build
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
 async function getBusiness(id: string) {
   const business = await prisma.business.findUnique({
     where: { id },
@@ -81,7 +85,7 @@ export default async function BusinessPage({
 
         <div className="mb-8 flex gap-3">
           <Button size="lg" asChild className="flex-1 sm:flex-none">
-            <Link href={`/business/${business.id}/book`}>קבע תור</Link>
+            <Link href={`/b/${business.slug || business.id}/book`}>קבע תור</Link>
           </Button>
         </div>
 
