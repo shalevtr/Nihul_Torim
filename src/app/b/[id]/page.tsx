@@ -15,8 +15,9 @@ import Link from "next/link"
 import { Phone, MapPin, Clock } from "lucide-react"
 import { Metadata } from "next"
 
-// Enable caching for public pages
+// Enable caching for public pages, but allow dynamic rendering if DB fails
 export const revalidate = 300 // 5 minutes
+export const dynamic = 'force-dynamic' // Allow DB calls at runtime
 
 async function getBusiness(idOrSlug: string) {
   const business = await prisma.business.findFirst({

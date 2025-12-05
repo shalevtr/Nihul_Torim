@@ -55,13 +55,17 @@ export function validateEnv() {
   }
 }
 
-// Validate on import (only in production or when explicitly called)
-if (process.env.NODE_ENV === 'production') {
+// Validate on import (only in production runtime, not during build)
+// During build, we allow missing env vars for static pages
+if (process.env.NODE_ENV === 'production' && process.env.NEXT_PHASE !== 'phase-production-build') {
   try {
     validateEnv()
   } catch (error) {
     console.error('❌ Environment validation failed:', error)
-    throw error
+    // Don't throw during build - let it fail at runtime instead
+    if (process.env.NEXT_PHASE !== 'phase-production-build') {
+      throw error
+    }
   }
 }
 

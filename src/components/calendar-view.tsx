@@ -1,9 +1,7 @@
 "use client"
 
-"use client"
-
 import { useState } from "react"
-import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, addMonths, subMonths } from "date-fns"
+import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, addMonths, subMonths, getDay } from "date-fns"
 import { he } from "date-fns/locale"
 import { Button } from "@/components/ui/button"
 import {
@@ -151,6 +149,14 @@ export function CalendarView({ bookedSlots }: CalendarViewProps) {
   const monthEnd = endOfMonth(currentMonth)
   const daysInMonth = eachDayOfInterval({ start: monthStart, end: monthEnd })
 
+  // Calculate the weekday of the first day of the month
+  // getDay() returns 0 (Sunday) to 6 (Saturday)
+  // For Hebrew calendar (RTL), we want Sunday (0) to be the first column
+  const firstDayOfWeek = getDay(monthStart)
+
+  // Create array with empty cells before the first day
+  const emptyCells = Array.from({ length: firstDayOfWeek }, (_, i) => i)
+
   const getSlotsForDay = (day: Date) => {
     return bookedSlots.filter((slot) => isSameDay(new Date(slot.date), day))
   }
@@ -183,6 +189,11 @@ export function CalendarView({ bookedSlots }: CalendarViewProps) {
           <div key={day} className="p-2 text-center font-semibold text-sm">
             {day}
           </div>
+        ))}
+
+        {/* Empty cells before the first day of the month */}
+        {emptyCells.map((_, index) => (
+          <div key={`empty-${index}`} className="min-h-24" />
         ))}
 
         {/* Days */}

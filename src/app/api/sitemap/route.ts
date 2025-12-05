@@ -1,6 +1,10 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
 
+// Force dynamic rendering - sitemap needs DB access
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
 export async function GET() {
   try {
     const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000'
