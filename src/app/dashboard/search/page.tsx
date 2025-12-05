@@ -322,6 +322,12 @@ export default function SearchPage() {
                             {business.category}
                           </span>
                           {business.city && <span className="text-sm">• {business.city}</span>}
+                          {business.distance !== null && business.distance !== undefined && (
+                            <span className="flex items-center gap-1 text-sm font-medium text-blue-600 dark:text-blue-400">
+                              <MapPin className="h-3 w-3" />
+                              {business.distance} ק"מ
+                            </span>
+                          )}
                           {business.avgRating > 0 && (
                             <span className="flex items-center gap-1 text-sm font-medium">
                               <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
