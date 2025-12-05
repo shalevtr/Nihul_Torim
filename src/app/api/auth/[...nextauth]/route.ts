@@ -13,7 +13,8 @@ const authOptions = {
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) {
+        // Runtime type guard to ensure credentials.email and credentials.password are strings
+        if (!credentials || typeof credentials.email !== 'string' || typeof credentials.password !== 'string') {
           return null
         }
 
