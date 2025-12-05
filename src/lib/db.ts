@@ -17,23 +17,29 @@ function getDatabaseUrl(): string {
     throw new Error("DATABASE_URL environment variable is not set")
   }
 
-  // If using Neon pooler, ensure SSL is required
-  if (url.includes("pooler") || url.includes("neon.tech")) {
+  // Always ensure SSL is required for production databases
+  // Parse URL and add SSL parameters
+  try {
     const urlObj = new URL(url)
-    // Add SSL mode if not present
+    
+    // Add SSL mode if not present (required for Neon and most cloud DBs)
     if (!urlObj.searchParams.has("sslmode")) {
       urlObj.searchParams.set("sslmode", "require")
     }
+    
     // Add connection pooling parameters if using pooler
-    if (url.includes("pooler")) {
+    if (url.includes("pooler") || url.includes("pgbouncer")) {
       if (!urlObj.searchParams.has("pgbouncer")) {
         urlObj.searchParams.set("pgbouncer", "true")
       }
     }
+    
     return urlObj.toString()
+  } catch (error) {
+    // If URL parsing fails, return original URL
+    console.warn("Failed to parse DATABASE_URL, using as-is:", error)
+    return url
   }
-
-  return url
 }
 
 export const prisma =

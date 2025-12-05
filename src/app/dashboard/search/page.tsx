@@ -24,16 +24,38 @@ export default function SearchPage() {
   const [businesses, setBusinesses] = useState<any[]>([])
   const [cities, setCities] = useState<string[]>([])
   const [loading, setLoading] = useState(true)
-  const [searchType, setSearchType] = useState<"text" | "category" | "city">("category")
+  const [searchType, setSearchType] = useState<"text" | "category" | "city" | "location">("category")
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedCategory, setSelectedCategory] = useState("")
   const [selectedCity, setSelectedCity] = useState("")
   const [minRating, setMinRating] = useState<string>("")
   const [sortBy, setSortBy] = useState<string>("name")
+  const [userLocation, setUserLocation] = useState<{ lat: number; lon: number } | null>(null)
+  const [locationError, setLocationError] = useState<string>("")
+  const [maxDistance, setMaxDistance] = useState<string>("10") // km
 
   useEffect(() => {
     fetchData()
-  }, [searchQuery, selectedCategory, selectedCity, minRating, sortBy])
+  }, [searchQuery, selectedCategory, selectedCity, minRating, sortBy, userLocation, maxDistance])
+
+  // Get user location when location search is selected
+  useEffect(() => {
+    if (searchType === "location" && !userLocation && navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setUserLocation({
+            lat: position.coords.latitude,
+            lon: position.coords.longitude,
+          })
+          setLocationError("")
+        },
+        (error) => {
+          setLocationError("לא ניתן לקבל מיקום. אנא בדוק את הרשאות הדפדפן.")
+          console.error("Geolocation error:", error)
+        }
+      )
+    }
+  }, [searchType, userLocation])
 
   async function fetchData() {
     setLoading(true)
@@ -44,6 +66,15 @@ export default function SearchPage() {
       if (selectedCity) params.append("city", selectedCity)
       if (minRating) params.append("minRating", minRating)
       if (sortBy) params.append("sortBy", sortBy)
+      
+      // Add location parameters if available
+      if (userLocation) {
+        params.append("lat", userLocation.lat.toString())
+        params.append("lon", userLocation.lon.toString())
+        if (maxDistance) params.append("maxDistance", maxDistance)
+        // Default to distance sort when location is used
+        if (sortBy === "name") params.set("sortBy", "distance")
+      }
 
       const res = await fetch(`/api/businesses/search?${params}`)
       const data = await res.json()
@@ -96,13 +127,73 @@ export default function SearchPage() {
             setSearchType("text")
             setSelectedCategory("")
             setSelectedCity("")
+            setUserLocation(null)
           }}
           className="whitespace-nowrap"
         >
           <SearchIcon className="ml-2 h-4 w-4" />
           חיפוש חופשי
         </Button>
+        <Button
+          variant={searchType === "location" ? "default" : "outline"}
+          onClick={() => {
+            setSearchType("location")
+            setSelectedCategory("")
+            setSelectedCity("")
+            setSearchQuery("")
+            if (!userLocation && navigator.geolocation) {
+              navigator.geolocation.getCurrentPosition(
+                (position) => {
+                  setUserLocation({
+                    lat: position.coords.latitude,
+                    lon: position.coords.longitude,
+                  })
+                  setLocationError("")
+                },
+                (error) => {
+                  setLocationError("לא ניתן לקבל מיקום. אנא בדוק את הרשאות הדפדפן.")
+                }
+              )
+            }
+          }}
+          className="whitespace-nowrap"
+        >
+          <MapPin className="ml-2 h-4 w-4" />
+          לידך
+        </Button>
       </div>
+      
+      {locationError && (
+        <div className="text-sm text-red-600 bg-red-50 p-3 rounded-lg">
+          {locationError}
+        </div>
+      )}
+      
+      {searchType === "location" && userLocation && (
+        <Card className="bg-blue-50 dark:bg-blue-900/20">
+          <CardContent className="pt-6">
+            <div className="flex items-center gap-4">
+              <MapPin className="h-5 w-5 text-blue-600" />
+              <div>
+                <p className="text-sm font-medium">חיפוש לפי מיקום</p>
+                <p className="text-xs text-muted-foreground">מרחק מקסימלי: {maxDistance} ק"מ</p>
+              </div>
+              <Select value={maxDistance} onValueChange={setMaxDistance} className="mr-auto">
+                <SelectTrigger className="w-32">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="2">2 ק"מ</SelectItem>
+                  <SelectItem value="5">5 ק"מ</SelectItem>
+                  <SelectItem value="10">10 ק"מ</SelectItem>
+                  <SelectItem value="20">20 ק"מ</SelectItem>
+                  <SelectItem value="50">50 ק"מ</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Advanced Filters */}
       <Card>
@@ -135,6 +226,7 @@ export default function SearchPage() {
                   <SelectItem value="name">שם</SelectItem>
                   <SelectItem value="rating">דירוג</SelectItem>
                   <SelectItem value="popularity">פופולריות</SelectItem>
+                  {userLocation && <SelectItem value="distance">מרחק</SelectItem>}
                 </SelectContent>
               </Select>
             </div>
