@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useMemo } from "react"
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, addMonths, subMonths, getDay } from "date-fns"
 import { he } from "date-fns/locale"
 import { Button } from "@/components/ui/button"
@@ -145,17 +145,33 @@ function CalendarSlot({ slot }: { slot: BookedSlot }) {
 export function CalendarView({ bookedSlots }: CalendarViewProps) {
   const [currentMonth, setCurrentMonth] = useState(new Date())
 
-  const monthStart = startOfMonth(currentMonth)
-  const monthEnd = endOfMonth(currentMonth)
-  const daysInMonth = eachDayOfInterval({ start: monthStart, end: monthEnd })
+  // Memoize calendar calculations to ensure they update when month changes
+  const calendarData = useMemo(() => {
+    const monthStart = startOfMonth(currentMonth)
+    const monthEnd = endOfMonth(currentMonth)
+    const daysInMonth = eachDayOfInterval({ start: monthStart, end: monthEnd })
 
-  // Calculate the weekday of the first day of the month
-  // getDay() returns 0 (Sunday) to 6 (Saturday)
-  // For Hebrew calendar (RTL), we want Sunday (0) to be the first column
-  const firstDayOfWeek = getDay(monthStart)
+    // Calculate the weekday of the first day of the month
+    // getDay() returns: 0 = Sunday, 1 = Monday, ..., 6 = Saturday
+    // Our Hebrew headers are RTL: ["א׳", "ב׳", "ג׳", "ד׳", "ה׳", "ו׳", "ש׳"]
+    // Which means: [Sunday, Monday, Tuesday, Wednesday, Thursday, Friday, Saturday]
+    // So column 0 = Sunday (א׳), column 6 = Saturday (ש׳)
+    // We need to map getDay() directly to column index
+    const firstDayOfWeek = getDay(monthStart) // 0-6, where 0=Sunday
 
-  // Create array with empty cells before the first day
-  const emptyCells = Array.from({ length: firstDayOfWeek }, (_, i) => i)
+    // Create array with empty cells before the first day
+    // If month starts on Sunday (0), we need 0 empty cells
+    // If month starts on Monday (1), we need 1 empty cell, etc.
+    const emptyCells = Array.from({ length: firstDayOfWeek }, (_, i) => i)
+
+    return {
+      monthStart,
+      monthEnd,
+      daysInMonth,
+      firstDayOfWeek,
+      emptyCells,
+    }
+  }, [currentMonth])
 
   const getSlotsForDay = (day: Date) => {
     return bookedSlots.filter((slot) => isSameDay(new Date(slot.date), day))
@@ -192,12 +208,12 @@ export function CalendarView({ bookedSlots }: CalendarViewProps) {
         ))}
 
         {/* Empty cells before the first day of the month */}
-        {emptyCells.map((_, index) => (
+        {calendarData.emptyCells.map((_, index) => (
           <div key={`empty-${index}`} className="min-h-24" />
         ))}
 
         {/* Days */}
-        {daysInMonth.map((day) => {
+        {calendarData.daysInMonth.map((day) => {
           const daySlots = getSlotsForDay(day)
           const isToday = isSameDay(day, new Date())
 
